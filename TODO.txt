@@ -1,1 +1,0 @@
-https://medium.com/@ev.zafeiratos/sudoku-solver-with-python-a-methodical-approach-for-algorithm-optimization-part-2-c48e83b89d20

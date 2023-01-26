@@ -19,49 +19,45 @@ def generatePuzzles(count: int, minZeros: int, maxZeros:int, fileName: str):
         minZeros: the minimum number of zeros desired in each puzzle.
         maxZeros: the maximum number of zeros desired in each puzzle.
         fileName: the file name where to save the puzzles
-    """
+    """ 
+    with open(fileName, "w", encoding="utf-8") as f:
+        print("Generating balanced dataset of {:0.0f} puzzles with {:0.0f} to {:0.0f} zeros.".format(count*(maxZeros+1-minZeros), minZeros, maxZeros))
 
-    try:
-        with open(fileName, "w", encoding="utf-8") as f:
-            print("Generating balanced dataset of {:0.0f} puzzles with {:0.0f} to {:0.0f} zeros.".format(count*(maxZeros+1-minZeros), minZeros, maxZeros))
+        puzzles = set()
+        # Loop for range of zeros
+        for j in tqdm.tqdm(range(minZeros, maxZeros+1)):
+            # Loop for number of puzzles per zeros
+            for i in range(count):
+                # Create empty puzzle
+                board = spu.to2DArray('000000000000000000000000000000000000000000000000000000000000000000000000000000000')
 
-            puzzles = {}
-            # Loop for range of zeros
-            for j in tqdm.tqdm(range(minZeros, maxZeros+1)):
-                # Loop for number of puzzles per zeros
-                for i in range(count):
-                    # Create empty puzzle
-                    board = spu.to2DArray('000000000000000000000000000000000000000000000000000000000000000000000000000000000')
+                # Solve puzzle
+                validValues = spu.cacheValidValues(board=board)
+                solver.backtracking(board=board, validValues=validValues, history=None, stats=None, searchMode=9, guessMode=2)
 
-                    # Solve puzzle
-                    solver.backtracking(board=board, history=None, stats=None, searchMode=9, guessMode=2)
-
-                    # Remove digits
-                    changed = 0
-                    while changed < j:
-                        row = random.sample(range(0,9),1)[0]
-                        col = random.sample(range(0,9),1)[0]
-                        
-                        if board[row][col]==0:
-                            continue
-
-                        board[row][col]=0
-                        changed+=1
-
-                    # Check if the puzzle was already created  
-                    if puzzles.__contains__(spu.toStr(board)):
-                        i-=1
+                # Remove digits
+                changed = 0
+                while changed < j:
+                    row = random.sample(range(0,9),1)[0]
+                    col = random.sample(range(0,9),1)[0]
+                    
+                    if board[row][col]==0:
                         continue
-                    else:
-                        puzzles[spu.toStr(board)]=board
 
-                    # Write the puzzle
-                    f.write("{}\n".format(spu.toStr(board)))
+                    board[row][col]=0
+                    changed+=1
 
-        print("Process completed successfully. Puzzles saved in {}\n".format(fileName))
-    except Exception as e:
-        print("Process failed due to:\n{}\n{}\n{}\n\n".format(type(e), e.args, e))
+                # Check if the puzzle was already created  
+                if puzzles.__contains__(spu.toStr(board)):
+                    i-=1
+                    continue
+                else:
+                    puzzles.add(spu.toStr(board))
 
+                # Write the puzzle
+                f.write("{}\n".format(spu.toStr(board)))
+
+    print("Process completed successfully. Puzzles saved in {}\n".format(fileName))
 
 def main():
     import argparse

@@ -6,7 +6,6 @@ Date: 13/01/2023
 
 A series of utility functions to clean and check a sudoku puzzle.
 """
-
 class SudokuStats:
     def __init__(self):
         self.guesses = 0
@@ -72,7 +71,7 @@ def toStr(puzzle):
     Arguments:
         puzzle: a 2 dimensional array representing the 9x9 puzzle. 
     """
-    r = ""
+    r = str()
 
     for row in puzzle:
         r += "".join(map(str, row))
@@ -86,11 +85,20 @@ def getColValues(puzzle, col: int):
         puzzle: a 2 dimensional array representing the 9x9 puzzle. 
         col: the column number.
     """
-    lst = []
+    lst = list()
     for row in puzzle:
         lst.append(row[col])
 
-    return lst;
+    return lst
+
+def getBox(row:int, col:int):
+    """
+    Returns the box identification number based on row and col number.
+    Arguments:
+        row: the row number.
+        col: the column number.
+    """
+    return (row//3)*3+ col//3
 
 def getBoxValues(puzzle, box: int):
     """
@@ -118,7 +126,6 @@ def isSolved(puzzle):
     Arguments:
         puzzle: a 2 dimensional array representing the 9x9 puzzle.
     """
-
     # Check rows
     for row in puzzle:
         if not checkList(row):
@@ -143,8 +150,7 @@ def isValid(puzzle, num: int, pos):
         puzzle: a 2 dimensional array representing the 9x9 puzzle.
         num: the number to insert.
         pos: the row and column position to place the digit.
-    """
-    
+    """ 
     # Check the row
     for i in range(len(puzzle[0])):
         if puzzle[pos[0]][i]==num and pos[1] != i:
@@ -165,3 +171,43 @@ def isValid(puzzle, num: int, pos):
                 return False
 
     return True
+
+def allowedValues(board,row,col):
+    """
+    Gets all allowed values for a given position in a board.
+    Arguments:
+        board: a 2 dimensional 9x9 sudoku puzzle.
+        row: the row number.
+        col: the column number.
+    """
+    result = list()
+
+    for number in range(1,10):
+        nums = board[row]
+        if number in nums:
+            continue
+
+        nums = getColValues(board, col)
+        if number in nums:
+            continue
+        
+        nums = getBoxValues(board, getBox(row,col))
+        if number in nums:
+            continue
+
+        result.append(number)
+
+    return result
+
+def cacheValidValues(board):
+    """
+    Creates a cache of possible values for each cell in a board.
+    Arguments:
+        board: a 2 dimensional array of a 9x9 sudoku board.
+    """
+    cache = dict()
+    for i in range(9):
+        for j in range(9):
+            if board[i][j] == 0:
+                cache[(i,j)] = allowedValues(board,i,j)
+    return cache

@@ -17,7 +17,7 @@ def main():
     parser.add_argument("guess", help="defines how numbers are guessed: 1 sequentially; 2 randomly.", type=int)
 
     args = parser.parse_args()
-    solvers.solve(puzzlesFileName=args.puzzlesFileName, solutionsFileName=args.solutionsFileName, statsFileName=args.statsFileName,\
+    solvers.solve(puzzlesFileName=args.puzzlesFileName, solutionsFileName=args.solutionsFileName, statsFileName=args.statsFileName, \
         trackingFileName=args.trackingFileName, errorsFileName=args.errorsFileName, offset=args.offset, limit=args.limit, search=args.search, guess=args.guess)
 
 if (__name__=="__main__"):

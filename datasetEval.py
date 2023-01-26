@@ -3,9 +3,7 @@ Dataset evaluator
 
 Author: Frankie Inguanez
 Date: 26/01/2023
-
 """
-
 import tqdm
 import sudokuPuzzleUtils as spu
 from matplotlib import pyplot as plt
@@ -19,7 +17,7 @@ def eval(puzzlesFileName: str, zerosFileName:str, difficultyFileName:str):
         difficultyFileName: the file name where to save the histogram for difficulty levels.
     """
     # Prepare the dictionary
-    zeros = {}
+    zeros = dict()
     for i in range(0,81):
         zeros[i] = 0
 
@@ -31,7 +29,7 @@ def eval(puzzlesFileName: str, zerosFileName:str, difficultyFileName:str):
             zeros[zeroCount] += 1     
 
     # Reduce dictionary to include only non zero keys
-    stats = {}
+    stats = dict()
     for i in range(0,81):
         if zeros[i]==0:
             continue

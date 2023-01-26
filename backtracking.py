@@ -6,7 +6,6 @@ Date: 15/01/2023
 
 Implementation of naive brute force with backtracking sudoku solver algorithm.
 """
-
 import sudokuPuzzleUtils as spu
 
 def getSearchAlg(searchMode: int):
@@ -66,7 +65,6 @@ def findByRow(puzzle):
     Arguments:
         puzzle: a 9x9 sudoku puzzle
     """
-    
     for row in range(len(puzzle)):
         for col in range(len(puzzle[0])):
             if puzzle[row][col] == 0:
@@ -148,23 +146,23 @@ def findEmpty(puzzle, search):
     
     return None
 
-def getGuesses(puzzle, guess):
+def getGuesses(validValues: list, guess: int):
     """
     Gets numbers to guess.
     Arguments:
-        puzzle: the 9x9 sudoku puzzle.
+        validValues: a dictionary of valid values.
         guess: the guessing mode. 1 for sequential, 2 for random.
     """
     import random
 
     if guess==1:
-        return range(1,10)
+        return validValues
     elif guess==2:
-        return random.sample(range(1,10),9)
+        return random.sample(validValues,len(validValues))
 
     return None
 
-def backtracking(board: list, history: list, stats: spu.SudokuStats, searchMode: int, guessMode: int):
+def backtracking(board: list, validValues: dict, history: list, stats: spu.SudokuStats, searchMode: int, guessMode: int):
     """
     Solves a 9x9 sudoku puzzle using backtracking algorithm.
     Arguments:
@@ -184,7 +182,7 @@ def backtracking(board: list, history: list, stats: spu.SudokuStats, searchMode:
         row, col = find
 
     # Get numbers to guess and attempt
-    for guess in getGuesses(board, guessMode):
+    for guess in getGuesses(validValues.get((row, col)), guessMode):
         if spu.isValid(board, guess, (row, col)):
 
             # Brute force guess
@@ -197,7 +195,7 @@ def backtracking(board: list, history: list, stats: spu.SudokuStats, searchMode:
                 history.append(spu.toStr(board))
 
             # Attempt to solve rest of puzzle with current choice
-            if backtracking(board, history, stats, searchMode, guessMode):
+            if backtracking(board, validValues, history, stats, searchMode, guessMode):
                 return True
 
             # Invalid puzzle so backtrack
@@ -211,8 +209,8 @@ def backtracking(board: list, history: list, stats: spu.SudokuStats, searchMode:
 
     return False
 
-def solve(  puzzlesFileName: str, solutionsFileName: str, statsFileName: str, trackingFileName: str, errorsFileName: str, offset: int, limit: int, \
-            search: int, guess: int):
+def solve(  puzzlesFileName: str, solutionsFileName: str, statsFileName: str, trackingFileName: str, errorsFileName: str, \
+            offset: int, limit: int, search: int, guess: int):
     """
     Solves puzzles found in a file using backtracking algorithm.
     Arguments:
@@ -252,10 +250,11 @@ def solve(  puzzlesFileName: str, solutionsFileName: str, statsFileName: str, tr
                 puzzle=line.strip()
                 board = spu.to2DArray(puzzle)
                 
-                history = []
+                history = list()
                 stats = spu.SudokuStats();
                 stats.setUnknowns(puzzle.count('0'))
-                stats.registerExecutionTime(timeit.timeit(lambda: backtracking(board, history, stats, search, guess), number=1000))                   
+                validValues = spu.cacheValidValues(board)
+                stats.registerExecutionTime(timeit.timeit(lambda: backtracking(board, validValues, history, stats, search, guess), number=1000))                   
                 
                 # Write solution
                 if solutionsFileName is not None:
