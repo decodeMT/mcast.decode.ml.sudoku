@@ -1,0 +1,12 @@
+pip3 install virtualenv
+python -m venv sudoku
+.\sudoku\Scripts\activate
+pip3 install jupyter
+ipython kernel install --name "sudoku-kernel" --user
+pip3 install requests
+pip3 install bs4
+pip3 install tqdm
+pip3 install matplotlib
+pip3 install pandas
+python -m pip freeze > requirements.txt
+.\sudoku\Scripts\deactivate

@@ -1,0 +1,5 @@
+Python
+Pylance
+Jupyter
+Jupyter PowerToys
+Jupyter Slide Show
