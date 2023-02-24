@@ -12,7 +12,7 @@
             "python": "${fileDirname}/sudoku-venv/Scripts/python.exe",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["./output/puzzles.txt", "./output/solutions.txt","./output/stats.csv", "./output/tracking.txt", "./output/errors.txt", "0", "1", "1", "1"]
+            "args": ["./output/puzzles.txt", "./output/solutions.txt","./output/stats.csv", "./output/tracking.txt", "./output/errors.txt", "0", "1", "2", "1", "1"]
         },
         {
             "name": "Solve multiple",
@@ -22,7 +22,7 @@
             "python": "${fileDirname}/sudoku-venv/Scripts/python.exe",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["./output/puzzles.txt", "./output/solutions.txt","./output/stats.csv", "./output/tracking.txt", "./output/errors.txt", "0", "250", "1", "1"]
+            "args": ["./output/puzzles.txt", "./output/solutions.txt","./output/stats.csv", "./output/tracking.txt", "./output/errors.txt", "0", "1000", "2", "1", "1"]
         },
         {
             "name": "Generate sudoku puzzles",
@@ -32,7 +32,7 @@
             "python": "${fileDirname}/sudoku-venv/Scripts/python.exe",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["50", "26", "30", "./output/puzzles.txt"]
+            "args": ["50", "26", "56", "./output/puzzles.txt"]
         }
         ,
         {
@@ -54,7 +54,7 @@
             "python": "${fileDirname}/sudoku-venv/Scripts/python.exe",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "args": ["./output/puzzles.txt", "./output", "0", "100"]
+            "args": ["./output/puzzles.txt", "./output", "0", "25"]
         }
     ]
 }

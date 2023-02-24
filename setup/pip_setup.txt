@@ -3,8 +3,6 @@ python -m venv sudoku-venv
 .\sudoku-venv\Scripts\activate
 pip3 install jupyter
 ipython kernel install --name "sudoku-venv-kernel" --user
-pip3 install requests
-pip3 install bs4
 pip3 install tqdm
 pip3 install matplotlib
 pip3 install pandas

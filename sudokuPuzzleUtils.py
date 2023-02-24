@@ -25,7 +25,7 @@ class SudokuStats:
     def setUnknowns(self, zeros:int):
         self.unknowns=zeros
 
-def getFileLineCount(fileName: str):
+def getFileLineCount(fileName: str) -> int:
     """
     Get number of lines in a file.
     Arguments:
@@ -42,7 +42,7 @@ def getFileLineCount(fileName: str):
 
     return lines
     
-def saveError(error, errorsFileName: str):
+def saveError(error: Exception, errorsFileName: str):
     """
     Saves an error/exception that is raised.
     Arguments:
@@ -57,7 +57,7 @@ def saveError(error, errorsFileName: str):
         print("Failed to save original error to file due to:\n{}\n{}\n{}\n\n".format(type(e), e.args, e))
         print("Original error:\n{}\n{}\n{}\n\n".format(type(error), error.args, error))
         
-def to2DArray(n: str):
+def to2DArray(n: str) -> list[list[int]]:
     """
     Convert a string to a 2D 9x9 array.
     Arguments:
@@ -65,7 +65,7 @@ def to2DArray(n: str):
     """
     return [list(map(int, n[i:i+9])) for i in range(0, 81, 9)]
 
-def toStr(puzzle):
+def toStr(puzzle) -> str:
     """
     Converts a puzzle to a string.
     Arguments:
@@ -78,7 +78,7 @@ def toStr(puzzle):
 
     return r
 
-def getColValues(puzzle, col: int):
+def getColValues(puzzle: list[list[int]], col: int) -> list[int]:
     """
     Get column values.
     Arguments:
@@ -91,16 +91,15 @@ def getColValues(puzzle, col: int):
 
     return lst
 
-def getBox(row:int, col:int):
+def getBox(pos: tuple[int, int]) -> int:
     """
     Returns the box identification number based on row and col number.
     Arguments:
-        row: the row number.
-        col: the column number.
+        pos: the row and column position.
     """
-    return (row//3)*3+ col//3
+    return (pos[0]//3)*3+ pos[1]//3
 
-def getBoxValues(puzzle, box: int):
+def getBoxValues(puzzle: list[list[int]], box: int) -> list[int]:
     """
     Get box values. Boxes are 3x3 sub-grids enumerates from top left in a raster fashion
     0, 1, 2
@@ -112,7 +111,29 @@ def getBoxValues(puzzle, box: int):
     """
     return [puzzle[x][y] for x in range((box//3)*3,((box//3)*3)+3) for y in range((box%3)*3, ((box%3)*3)+3)]
 
-def checkList(lst: list):
+def getBoxPositions(box: int) -> set[tuple[int,int]]:
+    """
+    Gets all positions of the same mini-grid box of the specified position.
+    Arguments:
+        box: the box number.
+    """
+    positions = set[tuple[int, int]]()
+
+    for x in range((box//3)*3,((box//3)*3)+3):
+        for y in range((box%3)*3, ((box%3)*3)+3):
+            positions.add((x, y))
+
+    return positions
+
+def getBoxPositionsByPos(pos: tuple[int,int]) -> set[tuple[int,int]]:
+    """
+    Gets all positions of the same mini-grid box of the specified position.
+    Arguments:
+        pos: the position of the cell within the puzzle board.
+    """
+    return getBoxPositions(getBox(pos))
+
+def checkList(lst: list[int]) -> bool:
     """
     Checks if a list contains all numbers from 1 to 9.
     Arguments:
@@ -120,7 +141,7 @@ def checkList(lst: list):
     """
     return set(lst) == set(range(1,10))
 
-def isSolved(puzzle):
+def isSolved(puzzle: list[list[int]]) -> bool:
     """
     Check if a puzzle has been solved.
     Arguments:
@@ -143,7 +164,7 @@ def isSolved(puzzle):
 
     return True
 
-def isValid(puzzle, num: int, pos):
+def isValid(puzzle: list[list[int]], num: int, pos: tuple[int, int]) -> bool:
     """
     Checks if a number can be added to a specific position
     Arguments:
@@ -162,36 +183,32 @@ def isValid(puzzle, num: int, pos):
             return False
 
     # Check box
-    box_x = pos[1] // 3
-    box_y = pos[0] // 3
-
-    for i in range(box_y*3, box_y*3 + 3):
-        for j in range(box_x * 3, box_x*3 + 3):
-            if puzzle[i][j] == num and (i,j) != pos:
-                return False
+    positions = getBoxPositionsByPos(pos)
+    for position in positions:
+        if puzzle[position[0]][position[1]] == num and position!=pos:
+            return False;
 
     return True
 
-def allowedValues(board,row,col):
+def allowedValues(board: list[list[int]], pos: tuple[int, int]) -> list[int]:
     """
     Gets all allowed values for a given position in a board.
     Arguments:
         board: a 2 dimensional 9x9 sudoku puzzle.
-        row: the row number.
-        col: the column number.
+        pos: the row and column position.
     """
     result = list()
 
     for number in range(1,10):
-        nums = board[row]
+        nums = board[pos[0]]
         if number in nums:
             continue
 
-        nums = getColValues(board, col)
+        nums = getColValues(board, pos[1])
         if number in nums:
             continue
         
-        nums = getBoxValues(board, getBox(row,col))
+        nums = getBoxValues(board, getBox(pos))
         if number in nums:
             continue
 
@@ -199,7 +216,7 @@ def allowedValues(board,row,col):
 
     return result
 
-def cacheValidValues(board):
+def cacheValidValues(board: list[list[int]]) -> dict:
     """
     Creates a cache of possible values for each cell in a board.
     Arguments:
@@ -209,5 +226,5 @@ def cacheValidValues(board):
     for i in range(9):
         for j in range(9):
             if board[i][j] == 0:
-                cache[(i,j)] = allowedValues(board,i,j)
+                cache[(i,j)] = allowedValues(board,(i,j))
     return cache

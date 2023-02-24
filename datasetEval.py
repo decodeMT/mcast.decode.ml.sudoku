@@ -37,6 +37,7 @@ def eval(puzzlesFileName: str, zerosFileName:str, difficultyFileName:str):
         stats[i]=zeros[i]
 
     # Create histogram for number of zeros and save
+    plt.figure(figsize=(10,6), dpi=150)
     plt.bar(range(len(stats)), list(stats.values()), align='center')
     plt.xticks(range(len(stats)), list(stats.keys()))
     plt.xlabel("Number of zeros")

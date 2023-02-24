@@ -8,45 +8,7 @@ Implementation of naive brute force with backtracking sudoku solver algorithm.
 """
 import sudokuPuzzleUtils as spu
 
-def getSearchAlg(searchMode: int):
-    """
-    Translates a numeric search mode to text.
-    Arguments:
-        searchMode: the numeric identifier for the search mode.
-    """
-    if (searchMode==1):
-        return "By Row"
-    elif (searchMode==2):
-        return "By Column"
-    elif (searchMode==3):
-        return "Random"
-    elif (searchMode==4):
-        return "By mini-grid sequential"
-    elif (searchMode==5):
-        return "By mini-grid zig-zag"
-    elif (searchMode==6):
-        return "By mini-grid sprial"
-    elif (searchMode==7):
-        return "By mini-grid semi zig-zag"
-    elif (searchMode==8):
-        return "By mini-grid randomly"
-    elif (searchMode==9):
-        return "By box diagonal"
-    else: return "Unknown" 
-
-def getGuessAlg(guessMode: int):
-    """
-    Translates a numeric guess mode to text.
-    Arguments:
-        guessMode: the numeric identifier for the guess mode.
-    """
-    if (guessMode==1):
-        return "Sequential"
-    elif (guessMode==2):
-        return "Random"
-    else: "Unknown"
-
-def findRandom(puzzle):
+def findRandom(puzzle: list[list[int]]) -> tuple[int, int] | None:
     """
     Finds the next empty cell in a random fashion.
     """
@@ -59,7 +21,7 @@ def findRandom(puzzle):
 
     return None
 
-def findByRow(puzzle):
+def findByRow(puzzle: list[list[int]]) -> tuple[int, int] | None:
     """
     Finds the next empty cell in a raster fashion, row by row.
     Arguments:
@@ -72,7 +34,7 @@ def findByRow(puzzle):
             
     return None
 
-def findByCol(puzzle):
+def findByCol(puzzle: list[list[int]]) -> tuple[int, int] | None:
     """
     Finds the next empty cell in a column order.
     Arguments:
@@ -85,7 +47,7 @@ def findByCol(puzzle):
     
     return None
 
-def findByBox(puzzle, mode):
+def findByBox(puzzle: list[list[int]], mode: int) -> tuple[int, int] | None:
     """
     Finds the next empty cell searching first by box then by row.
     Arguments:
@@ -110,6 +72,7 @@ def findByBox(puzzle, mode):
         boxes=random.sample(range(0,9),9)
     elif mode==9:
         boxes=[0,4,8,1,2,3,5,6,7]
+    else: return None
 
     for box in boxes:
         for row in range((box//3)*3,((box//3)*3)+3):
@@ -119,7 +82,7 @@ def findByBox(puzzle, mode):
 
     return None
 
-def findEmpty(puzzle, search):
+def findEmpty(puzzle: list[list[int]], search: int) -> tuple[int, int] | None:
     """
     Finds the next empty cell in a 9x9 sudoku puzzle.
     Arguments:
@@ -146,15 +109,18 @@ def findEmpty(puzzle, search):
     
     return None
 
-def getGuesses(validValues: list, guess: int):
+def getGuesses(validValues: list[int] | None, guess: int) -> list[int] | None:
     """
     Gets numbers to guess.
     Arguments:
         validValues: a dictionary of valid values.
         guess: the guessing mode. 1 for sequential, 2 for random.
     """
-    import random
+    if validValues is None:
+        return None
 
+    import random
+    
     if guess==1:
         return validValues
     elif guess==2:
@@ -162,7 +128,7 @@ def getGuesses(validValues: list, guess: int):
 
     return None
 
-def backtracking(board: list, validValues: dict, history: list, stats: spu.SudokuStats, searchMode: int, guessMode: int):
+def solve(board: list[list[int]], validValues: dict[tuple[int, int], list[int]], history: list | None, stats: spu.SudokuStats | None, searchMode: int, guessMode: int):
     """
     Solves a 9x9 sudoku puzzle using backtracking algorithm.
     Arguments:
@@ -182,7 +148,14 @@ def backtracking(board: list, validValues: dict, history: list, stats: spu.Sudok
         row, col = find
 
     # Get numbers to guess and attempt
-    for guess in getGuesses(validValues.get((row, col)), guessMode):
+    if not validValues.__contains__((row,col)):
+        return False
+
+    vals = getGuesses(validValues.get((row, col)), guessMode)
+    if vals is None:
+        return False
+        
+    for guess in vals:
         if spu.isValid(board, guess, (row, col)):
 
             # Brute force guess
@@ -195,7 +168,7 @@ def backtracking(board: list, validValues: dict, history: list, stats: spu.Sudok
                 history.append(spu.toStr(board))
 
             # Attempt to solve rest of puzzle with current choice
-            if backtracking(board, validValues, history, stats, searchMode, guessMode):
+            if solve(board, validValues, history, stats, searchMode, guessMode):
                 return True
 
             # Invalid puzzle so backtrack
@@ -208,73 +181,3 @@ def backtracking(board: list, validValues: dict, history: list, stats: spu.Sudok
             board[row][col] = 0
 
     return False
-
-def solve(  puzzlesFileName: str, solutionsFileName: str, statsFileName: str, trackingFileName: str, errorsFileName: str, \
-            offset: int, limit: int, search: int, guess: int):
-    """
-    Solves puzzles found in a file using backtracking algorithm.
-    Arguments:
-        puzzlesFileName: the file name containing puzzles
-        solutionsFileName: the file name where to store the solutions.
-        statsFileName: the file name where to store the statistics.
-        trackingFileName: the file name where tracking is saved.
-        errorsFileName: the file name where errors shall be saved.
-        offset: the number of puzzles to offset.
-        limit: the limit number of puzzles to solve.
-        search: defines how missing values are searched.
-        guess: defines how guesses are made.
-    """
-    import tqdm
-    import timeit
-
-    if not limit:
-        limit = spu.getFileLineCount(puzzlesFileName)
-    else: limit = limit
-
-    i = 1
-    hasError = False
-    try:
-        # Open statistics file and Write header row
-        if statsFileName is not None:
-            with open(statsFileName, "w", encoding="utf-8") as sf:
-                sf.write("Puzzle,Solution,Execution Time,Zeros,Guesses,Backtracks\n")
-
-        # Open puzzles and read till limit is reached.
-        with open(puzzlesFileName, "r", encoding="utf-8") as pf:
-            for line in tqdm.tqdm(pf, total=limit):
-                # Stop at limit
-                if (i>limit):
-                    break
-
-                # Create board and statistics
-                puzzle=line.strip()
-                board = spu.to2DArray(puzzle)
-                
-                history = list()
-                stats = spu.SudokuStats();
-                stats.setUnknowns(puzzle.count('0'))
-                validValues = spu.cacheValidValues(board)
-                stats.registerExecutionTime(timeit.timeit(lambda: backtracking(board, validValues, history, stats, search, guess), number=1000))                   
-                
-                # Write solution
-                if solutionsFileName is not None:
-                    with open(solutionsFileName, "a", encoding="utf-8") as af:
-                        af.write("{}\n".format(spu.toStr(board)))
-
-                # Write history
-                if trackingFileName is not None:
-                    with open(trackingFileName, "a", encoding="utf-8") as tf:
-                        for j in range(len(history)):
-                            tf.write("{}\n".format(spu.toStr(history[j])))
-
-                # Write statistics
-                if statsFileName is not None:
-                    with open(statsFileName, "a", encoding="utf-8") as sf:
-                        sf.write("{},{},{:0.17f},{:0.0f},{:0.0f},{:0.0f}\n"\
-                            .format(puzzle, spu.toStr(board), stats.executionTime, stats.unknowns, stats.guesses, stats.backtracks))
-                
-                i+=1
-
-    except Exception as e:
-        hasError = True
-        spu.saveError(e, errorsFileName)
